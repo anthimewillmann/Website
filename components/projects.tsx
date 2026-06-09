@@ -1,27 +1,54 @@
+import Image from "next/image";
+
 const projects = [
   {
-    description: "AI PRODUCT · DESIGN · DEVELOPMENT",
-    name: "Project One",
+    description:
+      "Educational relational database in Go with MVCC, WAL, Raft, replication, and sharding.",
+    name: "PolarisDB",
+    image: "/PolarisDB.png",
+    href: "https://github.com/anthimewillmann/PolarisDB",
+    smallerLandscape: true,
   },
   {
-    description: "WEB · DESIGN · DEVELOPMENT",
-    name: "Project Two",
+    description:
+      "Event-driven Go platform for agent orchestration, task execution, evaluation, memory management, and multi-agent workflow automation.",
+    name: "Distributed Agent Operating System",
+    image: "/Distributed-Agent-Operating-System.PNG",
+    href: "https://github.com/anthimewillmann/Distributed-Agent-Operating-System",
+    smallerLandscape: true,
   },
   {
-    description: "AI PRODUCT · DESIGN · DEVELOPMENT",
-    name: "Project Three",
+    description:
+      "AI-powered iOS recipe manager built with SwiftUI, Foundation Models, and Vision OCR for recipe generation, scanning, and guided cooking.",
+    name: "Culinaro",
+    image: "/Culinaro.PNG",
+    href: "https://apps.apple.com/us/app/culinaro/id6764299394",
+    portrait: true,
   },
   {
-    description: "WEB · DESIGN · DEVELOPMENT",
-    name: "Project Four",
+    description:
+      "Safari Web Extension for AI-powered webpage summaries and follow-up questions using Apple Foundation Models.",
+    name: "Sumari",
+    image: "/Sumari.PNG",
+    href: "https://github.com/anthimewillmann/Sumari",
+    portrait: true,
   },
   {
-    description: "PRODUCT · DESIGN · DEVELOPMENT",
-    name: "Project Five",
+    description:
+      "Data Science Project: The Personal Traffic around Kiel in the past five years",
+    name: "Kiel Traffic Analysis",
+    image: "/Kiel-Traffic-Analysis.PNG",
+    href: "https://kiel-traffic-analysis-7q4iyxxr2obfcxkxzmuq2k.streamlit.app/",
+    alignWithLabyrinth: true,
+    smallerLandscape: true,
   },
   {
-    description: "AI · WEB · DEVELOPMENT",
-    name: "Project Six",
+    description:
+      "Java Swing maze game with difficulty modes, keyboard controls, and Dijkstra-based pursuers.",
+    name: "Labyrinth",
+    image: "/Labyrinth.jpeg",
+    href: "https://github.com/anthimewillmann/Labyrinth",
+    smaller: true,
   },
 ];
 
@@ -29,7 +56,7 @@ export function Projects() {
   return (
     <section
       aria-labelledby="projects-title"
-      className="bg-white px-6 pb-24 pt-16 sm:px-10 sm:pb-32 sm:pt-20 md:px-14 lg:pt-72"
+      className="bg-white px-6 pb-12 pt-16 sm:px-10 sm:pb-16 sm:pt-20 md:px-14 lg:pt-72"
     >
       <div className="mx-auto w-full max-w-[1360px]">
         <div className="grid grid-cols-1 gap-x-8 lg:grid-cols-2 lg:gap-x-10">
@@ -41,20 +68,64 @@ export function Projects() {
           </h2>
         </div>
 
-        <div className="mt-14 grid grid-cols-1 gap-x-8 gap-y-16 sm:mt-20 lg:grid-cols-2 lg:gap-x-10">
+        <div className="mt-14 grid grid-cols-1 gap-x-8 gap-y-20 sm:mt-20 lg:grid-cols-2 lg:gap-x-10">
           {projects.map((project) => (
-            <article key={project.name} className="text-center">
-              <div
-                aria-hidden="true"
-                className="aspect-[4/3] w-full rounded-[28px] bg-[#E8E8E8] ring-1 ring-inset ring-black/[0.05] sm:rounded-[36px]"
-              />
+            <article
+              key={project.name}
+              className={`text-center ${
+                project.alignWithLabyrinth || project.smaller
+                  ? "lg:self-center"
+                  : ""
+              }`}
+            >
+              {project.portrait ? (
+                <div className="mx-auto w-[320px]">
+                  <Image
+                    src={project.image}
+                    alt={project.name}
+                    width={600}
+                    height={1300}
+                    className="w-full rounded-[32px] shadow-xl ring-1 ring-inset ring-black/[0.05]"
+                  />
+                </div>
+              ) : project.smaller ? (
+                <div className="mx-auto w-[82%]">
+                  <Image
+                    src={project.image}
+                    alt={project.name}
+                    width={1600}
+                    height={1000}
+                    className="h-auto w-full rounded-[32px] shadow-xl ring-1 ring-black/[0.05]"
+                  />
+                </div>
+              ) : (
+                <div
+                  className={`mx-auto ${
+                    project.smallerLandscape ? "w-[88%]" : "w-full"
+                  }`}
+                >
+                  <Image
+                    src={project.image}
+                    alt={project.name}
+                    width={1600}
+                    height={1000}
+                    className="h-auto w-full rounded-[32px] shadow-xl ring-1 ring-black/[0.05]"
+                  />
+                </div>
+              )}
 
               <p className="mt-8 font-sans text-[clamp(0.72rem,1vw,0.85rem)] font-medium tracking-[0.01em] text-[#0A0A0A]">
                 {project.description}
               </p>
-              <h3 className="mt-4 font-sans text-[clamp(2rem,4vw,3.5rem)] font-medium leading-none tracking-[-0.045em] text-[#0A0A0A]">
+
+              <a
+                href={project.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 inline-block font-sans text-[clamp(2.1rem,4.2vw,3.675rem)] font-medium leading-none tracking-[-0.045em] text-[#0A0A0A] transition-transform duration-200 hover:scale-105"
+              >
                 {project.name}
-              </h3>
+              </a>
             </article>
           ))}
         </div>

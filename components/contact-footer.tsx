@@ -1,5 +1,5 @@
 const pillClassName =
-  "inline-flex min-h-12 items-center justify-center rounded-full bg-[#C454E8] px-6 py-3 text-center font-sans text-[clamp(0.78rem,1.2vw,1rem)] font-medium tracking-[-0.01em] text-white sm:min-h-14 sm:px-8";
+  "inline-flex min-h-12 items-center justify-center rounded-full bg-[#C454E8] px-6 py-3 text-center font-sans text-[clamp(0.78rem,1.2vw,1rem)] font-medium tracking-[-0.01em] text-white transition-transform duration-200 hover:scale-[1.05] sm:min-h-14 sm:px-8";
 
 export function ContactFooter() {
   return (

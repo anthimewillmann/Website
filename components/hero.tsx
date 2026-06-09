@@ -32,11 +32,38 @@ export function Hero() {
             Anthime Willmann
           </h1>
 
-          <p
-            className="mt-7 flex min-h-12 w-full max-w-[22rem] items-center justify-center rounded-full bg-accent px-5 py-3 text-center font-sans text-[clamp(0.78rem,1.2vw,1rem)] font-medium tracking-[-0.01em] text-white sm:mt-8 sm:min-h-14 sm:px-8"
+          <a
+            href="https://www.uni-kiel.de/de/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="
+              mt-7
+              flex
+              min-h-12
+              w-full
+              max-w-[22rem]
+              items-center
+              justify-center
+              rounded-full
+              bg-accent
+              px-5
+              py-3
+              text-center
+              font-sans
+              text-[clamp(0.78rem,1.2vw,1rem)]
+              font-medium
+              tracking-[-0.01em]
+              text-white
+              transition-all
+              duration-200
+              hover:scale-105
+              sm:mt-8
+              sm:min-h-14
+              sm:px-8
+            "
           >
             Computer Science Student at CAU Kiel
-          </p>
+          </a>
         </div>
 
         <div className="aspect-square w-full max-w-[440px] justify-self-center overflow-hidden rounded-[40px] min-[1360px]:w-[34vw] min-[1360px]:min-w-[360px] min-[1360px]:max-w-[480px] min-[1360px]:justify-self-end">
