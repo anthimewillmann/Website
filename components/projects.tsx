@@ -13,7 +13,7 @@ const projects = [
     description:
       "Event-driven Go platform for agent orchestration, task execution, evaluation, memory management, and multi-agent workflow automation.",
     name: "Distributed Agent Operating System",
-    image: "/Distributed-Agent-Operating-System.png",
+    image: "/Distributed-Agent-Operating-System.PNG",
     href: "https://github.com/anthimewillmann/Distributed-Agent-Operating-System",
     smallerLandscape: true,
   },
@@ -37,7 +37,7 @@ const projects = [
     description:
       "Data Science Project: The Personal Traffic around Kiel in the past five years",
     name: "Kiel Traffic Analysis",
-    image: "/Kiel-Traffic-Analysis.png",
+    image: "/Kiel-Traffic-Analysis.PNG",
     href: "https://kiel-traffic-analysis-7q4iyxxr2obfcxkxzmuq2k.streamlit.app/",
     alignWithLabyrinth: true,
     smallerLandscape: true,

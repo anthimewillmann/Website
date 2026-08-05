@@ -1,17 +1,19 @@
-import { AboutShowreel } from "@/components/about-showreel";
+import { About } from "@/components/about";
 import { ContactFooter } from "@/components/contact-footer";
+import { Designs } from "@/components/designs";
 import { Hero } from "@/components/hero";
-import { PinkBand } from "@/components/pink-band";
 import { Projects } from "@/components/projects";
+import { ScrollToHash } from "@/components/scroll-to-hash";
 
 export default function Home() {
-  return (
-    <main>
-      <Hero />
-      <AboutShowreel />
-      <Projects />
-      <PinkBand />
-      <ContactFooter />
-    </main>
-  );
+    return (
+        <main>
+            <ScrollToHash />
+            <Hero />
+            <About />
+            <Projects />
+            <Designs />
+            <ContactFooter />
+        </main>
+    );
 }
