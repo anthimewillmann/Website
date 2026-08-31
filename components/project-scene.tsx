@@ -7,13 +7,13 @@ import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion
 import type { Project } from "@/lib/projects";
 
 export function ProjectScene({ project }: { project: Project }) {
-    // Nach dem letzten Bild bleibt die Galerie noch drei Viewport-Höhen stehen.
-    // So reicht ein einzelner, schneller Scrollimpuls nicht aus, um sofort
-    // wieder zur Übersicht zurückzukehren.
-    const endResistanceScreens = 3;
+    // Kurz vor dem Ende erreicht das letzte Bild seine Position. Danach hält
+    // eine echte Scroll-Sperre die Ansicht fest, statt die Strecke nur zu
+    // verlängern.
+    const wallApproachScreens = 0.1;
     const router = useRouter();
     const trackContainerRef = useRef<HTMLDivElement>(null);
-    const sentinelRef = useRef<HTMLDivElement>(null);
+    const endWallActiveRef = useRef(false);
     const prefersReducedMotion = useReducedMotion();
     const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
 
@@ -31,7 +31,7 @@ export function ProjectScene({ project }: { project: Project }) {
     // nicht gibt, und man scrollt am Ende ins Leere.
     const slideCount = 1 + project.gallery.length;
     const slideTransitions = Math.max(slideCount - 1, 0);
-    const scrollDistanceScreens = slideTransitions + endResistanceScreens;
+    const scrollDistanceScreens = slideTransitions + wallApproachScreens;
     const finalSlideProgress =
         slideTransitions === 0 ? 1 : slideTransitions / scrollDistanceScreens;
 
@@ -49,44 +49,63 @@ export function ProjectScene({ project }: { project: Project }) {
         return `-${slideProgress * slideTransitions * 100}%`;
     });
 
-    // Sobald der Sentinel nach der Bilderstrecke sichtbar wird: zurück zur Übersicht
+    // Am Ende wird nach unten gerichtetes Scrollen zunächst abgefangen. Erst
+    // mehrere bewusste Impulse lösen die Rückkehr zur Übersicht aus.
     useEffect(() => {
-        const el = sentinelRef.current;
-        if (!el) return;
+        const stopObservingProgress = scrollYProgress.on("change", (progress) => {
+            endWallActiveRef.current = progress >= finalSlideProgress;
+        });
 
-        // IntersectionObserver ruft den Callback einmal synchron mit dem
-        // aktuellen Zustand auf, sobald observe() aufgerufen wird - dieser
-        // "synthetische" erste Aufruf soll nicht als echter Scroll-Trigger
-        // zählen, sonst würde z.B. bei sehr kurzem Inhalt sofort navigiert.
-        let hasReceivedInitialCallback = false;
-        // Schutz gegen doppelte Navigation, falls der Observer während der
-        // Navigation (Layout-Verschiebung, Unmount-Timing) noch einmal mit
-        // isIntersecting=true feuert.
+        let pressure = 0;
+        let lastImpulseAt = 0;
         let hasNavigated = false;
+        let touchY: number | undefined;
 
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                if (!hasReceivedInitialCallback) {
-                    hasReceivedInitialCallback = true;
-                    return;
-                }
+        const pushAgainstWall = (distance: number, event: Event) => {
+            if (!endWallActiveRef.current || distance <= 0) return;
 
-                if (entry.isIntersecting && !hasNavigated) {
-                    hasNavigated = true;
-                    // replace statt push: sonst landet man beim
-                    // Zurück-Navigieren erst wieder am Ende der
-                    // Bilderstrecke, bevor man wirklich zur Übersicht kommt.
-                    // Next.js soll die Seite nicht zusätzlich selbst scrollen.
-                    // Die Übersicht positioniert sich einmalig und ohne Animation
-                    // auf die Projektüberschrift (siehe ScrollToHash).
-                    router.replace("/#projects-title", { scroll: false });
-                }
-            },
-            { threshold: 0 }
-        );
-        observer.observe(el);
-        return () => observer.disconnect();
-    }, [router]);
+            event.preventDefault();
+            if (hasNavigated) return;
+
+            const now = performance.now();
+            if (now - lastImpulseAt > 350) pressure = 0;
+            lastImpulseAt = now;
+            pressure += distance;
+
+            // Etwa zwei feste Trackpad-Gesten bzw. neun Mausrad-Schritte.
+            if (pressure >= 900) {
+                hasNavigated = true;
+                router.replace("/#projects-title", { scroll: false });
+            }
+        };
+
+        const handleWheel = (event: WheelEvent) => {
+            pushAgainstWall(event.deltaY, event);
+        };
+
+        const handleTouchStart = (event: TouchEvent) => {
+            touchY = event.touches[0]?.clientY;
+        };
+
+        const handleTouchMove = (event: TouchEvent) => {
+            const nextTouchY = event.touches[0]?.clientY;
+            if (touchY === undefined || nextTouchY === undefined) return;
+
+            pushAgainstWall(touchY - nextTouchY, event);
+            touchY = nextTouchY;
+        };
+
+        window.addEventListener("wheel", handleWheel, { passive: false });
+        window.addEventListener("touchstart", handleTouchStart, { passive: true });
+        window.addEventListener("touchmove", handleTouchMove, { passive: false });
+
+        return () => {
+            stopObservingProgress();
+            window.removeEventListener("wheel", handleWheel);
+            window.removeEventListener("touchstart", handleTouchStart);
+            window.removeEventListener("touchmove", handleTouchMove);
+        };
+    }, [finalSlideProgress, router, scrollYProgress]);
 
     if (prefersReducedMotion) {
         return (
@@ -218,7 +237,6 @@ export function ProjectScene({ project }: { project: Project }) {
                 </div>
             </div>
 
-            <div ref={sentinelRef} className="h-[20vh] w-full" />
         </main>
     );
 }
