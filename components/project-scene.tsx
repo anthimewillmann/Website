@@ -226,7 +226,7 @@ export function ProjectScene({ project }: { project: Project }) {
                         style={{ x }}
                         className="flex h-full w-max items-center gap-10 px-10 sm:gap-14 sm:px-14 md:gap-16 md:px-16"
                     >
-                        <div className="flex h-full w-[min(560px,calc(100vw-5rem))] flex-none items-center justify-center sm:w-[min(560px,calc(100vw-7rem))] md:w-[min(560px,calc(100vw-8rem))]">
+                        <div className="flex h-full w-[min(440px,calc(100vw-5rem))] flex-none items-center justify-center sm:w-[min(440px,calc(100vw-7rem))] md:w-[min(440px,calc(100vw-8rem))]">
                             <div className="flex w-full flex-col items-center gap-10 text-center sm:gap-14 md:gap-16">
                                 <h1 className="text-balance font-sans text-[clamp(2.25rem,6vw,4rem)] font-medium leading-[0.95] tracking-[-0.045em] text-[var(--foreground)]">
                                     {project.name}
