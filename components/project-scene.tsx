@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import type { RefObject } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useReducedMotion } from "framer-motion";
@@ -11,15 +12,20 @@ function ProjectStack({
     failedImages,
     onImageError,
     className,
+    sectionRef,
 }: {
     project: Project;
     failedImages: Set<number>;
     onImageError: (index: number) => void;
     className?: string;
+    sectionRef?: RefObject<HTMLElement | null>;
 }) {
     return (
         <main className={`bg-[var(--background)] ${className ?? ""}`}>
-            <section className="mx-auto flex w-full max-w-[1200px] flex-col items-center gap-10 px-6 py-10 sm:px-10 sm:py-14">
+            <section
+                ref={sectionRef}
+                className="mx-auto flex w-full max-w-[1200px] flex-col items-center gap-10 px-6 py-10 sm:px-10 sm:py-14"
+            >
                 <div className="flex w-full max-w-[560px] flex-col items-center text-center">
                     <h1 className="text-balance font-sans text-[clamp(2.25rem,6vw,4rem)] font-medium leading-[0.95] tracking-[-0.045em] text-[var(--foreground)]">
                         {project.name}
@@ -82,6 +88,7 @@ export function ProjectScene({ project }: { project: Project }) {
     const router = useRouter();
     const trackContainerRef = useRef<HTMLDivElement>(null);
     const horizontalTrackRef = useRef<HTMLDivElement>(null);
+    const mobileStackRef = useRef<HTMLElement>(null);
     const endWallActiveRef = useRef(false);
     const prefersReducedMotion = useReducedMotion();
     const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
@@ -175,14 +182,23 @@ export function ProjectScene({ project }: { project: Project }) {
             endWallActiveRef.current = isAtWall;
         };
 
+        const getActiveScrollContainer = () => {
+            const horizontalTrack = trackContainerRef.current;
+            if (horizontalTrack?.offsetParent !== null) return horizontalTrack;
+
+            const verticalStack = mobileStackRef.current;
+            if (!prefersReducedMotion && verticalStack?.offsetParent !== null) return verticalStack;
+
+            return null;
+        };
+
         const updateEndWallState = () => {
-            const track = trackContainerRef.current;
-            if (!track || track.offsetParent === null) {
+            const container = getActiveScrollContainer();
+            if (!container) {
                 setEndWallState(false);
                 return;
             }
-            const trackBottom = track.getBoundingClientRect().bottom;
-            setEndWallState(trackBottom !== undefined && trackBottom <= window.innerHeight + 1);
+            setEndWallState(container.getBoundingClientRect().bottom <= window.innerHeight + 1);
         };
         updateEndWallState();
         window.addEventListener("scroll", updateEndWallState, { passive: true });
@@ -202,9 +218,9 @@ export function ProjectScene({ project }: { project: Project }) {
             const isNewGesture = now - lastDownwardInputAt > 150;
             lastDownwardInputAt = now;
 
-            const track = trackContainerRef.current;
-            if (!track || track.offsetParent === null) return;
-            const isAtWall = track.getBoundingClientRect().bottom <= window.innerHeight + 1;
+            const container = getActiveScrollContainer();
+            if (!container) return;
+            const isAtWall = container.getBoundingClientRect().bottom <= window.innerHeight + 1;
             setEndWallState(isAtWall);
             if (!isAtWall) return;
 
@@ -243,7 +259,7 @@ export function ProjectScene({ project }: { project: Project }) {
             window.removeEventListener("touchstart", handleTouchStart);
             window.removeEventListener("touchmove", handleTouchMove);
         };
-    }, [router]);
+    }, [prefersReducedMotion, router]);
 
     if (prefersReducedMotion) {
         return (
@@ -262,6 +278,7 @@ export function ProjectScene({ project }: { project: Project }) {
                 project={project}
                 failedImages={failedImages}
                 onImageError={markImageFailed}
+                sectionRef={mobileStackRef}
             />
             <main className="hidden bg-[var(--background)] md:block">
             <div
