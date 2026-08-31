@@ -21,6 +21,8 @@ export function ScrollToHash() {
         let restoreBehaviorFrame: number | undefined;
         let unlockTimer: number | undefined;
         let targetY: number | undefined;
+        const previousDocumentOverflow = document.documentElement.style.overflow;
+        const previousBodyOverflow = document.body.style.overflow;
 
         const scrollToTarget = () => {
             const target = document.getElementById(id);
@@ -46,10 +48,16 @@ export function ScrollToHash() {
         };
 
         if (shouldLockReturn) {
+            // Die Sperre auf dem Scroll-Root hält auch bereits laufendes
+            // Trackpad-Momentum an, nicht nur neue Wheel-Ereignisse.
+            document.documentElement.style.overflow = "hidden";
+            document.body.style.overflow = "hidden";
             window.addEventListener("wheel", preventMomentum, { passive: false, capture: true });
             window.addEventListener("touchmove", preventMomentum, { passive: false, capture: true });
             window.addEventListener("scroll", holdAtProjectTitle, { passive: true });
             unlockTimer = window.setTimeout(() => {
+                document.documentElement.style.overflow = previousDocumentOverflow;
+                document.body.style.overflow = previousBodyOverflow;
                 window.removeEventListener("wheel", preventMomentum, true);
                 window.removeEventListener("touchmove", preventMomentum, true);
                 window.removeEventListener("scroll", holdAtProjectTitle);
@@ -63,6 +71,8 @@ export function ScrollToHash() {
             }
             if (unlockTimer !== undefined) window.clearTimeout(unlockTimer);
             if (shouldLockReturn) {
+                document.documentElement.style.overflow = previousDocumentOverflow;
+                document.body.style.overflow = previousBodyOverflow;
                 window.removeEventListener("wheel", preventMomentum, true);
                 window.removeEventListener("touchmove", preventMomentum, true);
                 window.removeEventListener("scroll", holdAtProjectTitle);
