@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
@@ -14,6 +14,12 @@ export function ProjectScene({ project }: { project: Project }) {
     const prefersReducedMotion = useReducedMotion();
     const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
     const [horizontalTravel, setHorizontalTravel] = useState(0);
+
+    // Next.js behält beim Wechsel aus der Übersicht gelegentlich die bisherige
+    // vertikale Position bei. Jede Projektseite beginnt daher oben beim Titel.
+    useLayoutEffect(() => {
+        window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    }, [project.slug]);
 
     const markImageFailed = (index: number) =>
         setFailedImages((previous) => {
