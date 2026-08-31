@@ -36,7 +36,7 @@ export function Designs() {
 
   return (
       <section
-          aria-label="Designs"
+          aria-labelledby="designs-title"
           className="relative overflow-hidden bg-[var(--background)] py-14 sm:py-20 lg:py-24"
       >
         {/* Rein dekorative Hintergrundform, unabhängig vom Bildergitter */}
@@ -56,7 +56,10 @@ export function Designs() {
         </svg>
 
         <div className="mx-auto w-full max-w-[1200px] px-6 sm:px-10 md:px-14">
-          <h2 className="text-center font-sans text-[clamp(2.75rem,7vw,5.5rem)] font-medium leading-[0.95] tracking-[-0.045em] text-[var(--foreground)]">
+          <h2
+              id="designs-title"
+              className="text-center font-sans text-[clamp(2.75rem,7vw,5.5rem)] font-medium leading-[0.95] tracking-[-0.045em] text-[var(--foreground)]"
+          >
             Designs
           </h2>
 

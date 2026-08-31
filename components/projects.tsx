@@ -12,7 +12,7 @@ export function Projects() {
         <div className="grid grid-cols-1 gap-x-8 lg:grid-cols-2 lg:gap-x-10">
           <h2
             id="projects-title"
-            className="text-center font-sans text-[clamp(3.5rem,9vw,7.5rem)] font-medium leading-[0.95] tracking-[-0.055em] text-[var(--foreground)]"
+            className="text-center font-sans text-[clamp(2.75rem,7vw,5.5rem)] font-medium leading-[0.95] tracking-[-0.045em] text-[var(--foreground)]"
           >
             Projects
           </h2>
