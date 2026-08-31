@@ -5,7 +5,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   metadataBase: new URL("https://anthimewillmann.vercel.app"),
   title: {
-    default: "Anthime Willmann — Portfolio",
+    default: "Anthime Willmann",
     template: "%s | Anthime Willmann",
   },
   description:
@@ -18,13 +18,13 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "/",
     siteName: "Anthime Willmann",
-    title: "Anthime Willmann — Portfolio",
+    title: "Anthime Willmann",
     description:
       "Portfolio of Anthime Willmann, a Computer Science student at CAU Kiel.",
   },
   twitter: {
     card: "summary",
-    title: "Anthime Willmann — Portfolio",
+    title: "Anthime Willmann",
     description:
       "Portfolio of Anthime Willmann, a Computer Science student at CAU Kiel.",
   },
