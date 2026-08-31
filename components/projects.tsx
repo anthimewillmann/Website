@@ -27,7 +27,11 @@ export function Projects() {
                 aria-label={`${project.name} und Bildergalerie öffnen`}
               >
                 <div
-                  className={project.portrait ? "mx-auto w-[320px]" : "mx-auto w-full"}
+                  className={
+                    project.portrait
+                      ? "mx-auto w-[320px]"
+                      : `mx-auto ${project.overviewImageWidth ?? "w-full"}`
+                  }
                 >
                   <Image
                     src={project.image}

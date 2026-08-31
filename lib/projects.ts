@@ -6,6 +6,7 @@ export type Project = {
   image: string;
   gallery: string[];
   portrait?: boolean;
+  overviewImageWidth?: string;
 };
 
 export const projects: Project[] = [
@@ -64,6 +65,9 @@ export const projects: Project[] = [
         "Java Swing maze game with difficulty modes, keyboard controls, and Dijkstra-based pursuers.",
     href: "https://github.com/anthimewillmann/Labyrinth",
     image: "/Labyrinth.jpeg",
+    // Das Bild ist nahezu quadratisch. Mit 59,8 % der Spaltenbreite erhält
+    // es dieselbe sichtbare Höhe wie das breitere Kiel-Traffic-Bild.
+    overviewImageWidth: "w-[59.8%]",
     gallery: [
       "/8FC66A68-585E-46BE-BEAA-61A29CDA8E5B_1_105_c.jpeg",
       "/36716257-209C-49AA-AC09-DC9556C7EA3E_1_105_c.jpeg",
