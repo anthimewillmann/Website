@@ -10,6 +10,7 @@ export function ProjectScene({ project }: { project: Project }) {
     const router = useRouter();
     const trackContainerRef = useRef<HTMLDivElement>(null);
     const horizontalTrackRef = useRef<HTMLDivElement>(null);
+    const hasPositionedTrackRef = useRef(false);
     const endWallActiveRef = useRef(false);
     const prefersReducedMotion = useReducedMotion();
     const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
@@ -43,7 +44,7 @@ export function ProjectScene({ project }: { project: Project }) {
             return next;
         });
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         const track = horizontalTrackRef.current;
         if (!track) return;
 
@@ -67,6 +68,17 @@ export function ProjectScene({ project }: { project: Project }) {
         target: trackContainerRef,
         offset: ["start start", "end end"],
     });
+
+    // Beim ersten Render ist die Breite der Bilder noch unbekannt. Sobald die
+    // echte horizontale Strecke gemessen wurde, erzwingen wir genau einmal den
+    // Startpunkt statt den zuvor möglichen Fortschrittswert 1.
+    useLayoutEffect(() => {
+        if (horizontalTravel <= 0 || hasPositionedTrackRef.current) return;
+
+        hasPositionedTrackRef.current = true;
+        window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        scrollYProgress.set(0);
+    }, [horizontalTravel, scrollYProgress]);
 
     const x = useTransform(scrollYProgress, (progress) => {
         return `-${progress * horizontalTravel}px`;
