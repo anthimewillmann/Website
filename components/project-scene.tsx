@@ -73,12 +73,6 @@ function ProjectStack({
                     )}
                 </div>
 
-                <a
-                    href="/#projects-title"
-                    className="font-sans text-sm font-medium tracking-[-0.01em] text-[var(--foreground)] opacity-70 underline-offset-4 hover:underline"
-                >
-                    Zurück zur Übersicht
-                </a>
             </section>
         </main>
     );
