@@ -81,16 +81,9 @@ export function ProjectScene({ project }: { project: Project }) {
 
             hasNavigated = true;
 
-            // Das Momentum einer Maus-/Trackpad-Geste lebt über den
-            // Routenwechsel hinaus. Es wird deshalb kurz global abgefangen,
-            // damit die Übersicht am Projekttitel stehen bleibt.
-            const blockMomentum = (event: Event) => event.preventDefault();
-            window.addEventListener("wheel", blockMomentum, { passive: false });
-            window.addEventListener("touchmove", blockMomentum, { passive: false });
-            window.setTimeout(() => {
-                window.removeEventListener("wheel", blockMomentum);
-                window.removeEventListener("touchmove", blockMomentum);
-            }, 700);
+            // Die Übersichtsseite übernimmt die Sperre nach dem
+            // Routenwechsel und schluckt dort verbleibendes Scroll-Momentum.
+            window.sessionStorage.setItem("project-return-scroll-lock", "1");
 
             router.replace("/#projects-title");
         };
