@@ -49,12 +49,16 @@ export function ProjectScene({ project }: { project: Project }) {
         let hasNavigated = false;
         let touchY: number | undefined;
 
-        const stopObservingProgress = scrollYProgress.on("change", (progress) => {
-            // 99,9 % entspricht nur wenigen Pixeln und vermeidet Rundungsfehler
-            // am Ende eines scrollbaren Containers.
-            const isAtWall = progress >= 0.999;
-            endWallActiveRef.current = isAtWall;
-        });
+        const updateEndWallState = () => {
+            const trackBottom = trackContainerRef.current?.getBoundingClientRect().bottom;
+            // Ein Pixel Toleranz vermeidet Rundungsfehler am Ende des Containers.
+            endWallActiveRef.current =
+                trackBottom !== undefined && trackBottom <= window.innerHeight + 1;
+        };
+
+        const handleScroll = () => updateEndWallState();
+        updateEndWallState();
+        window.addEventListener("scroll", handleScroll, { passive: true });
 
         const returnToOverview = () => {
             if (hasNavigated) return;
@@ -76,11 +80,8 @@ export function ProjectScene({ project }: { project: Project }) {
         };
 
         const pushAgainstWall = (distance: number, event: Event) => {
-            const trackBottom = trackContainerRef.current?.getBoundingClientRect().bottom;
-            const isAtWall =
-                endWallActiveRef.current ||
-                (trackBottom !== undefined && trackBottom <= window.innerHeight + 1);
-            if (!isAtWall || distance <= 0) return;
+            updateEndWallState();
+            if (!endWallActiveRef.current || distance <= 0) return;
 
             event.preventDefault();
             returnToOverview();
@@ -102,17 +103,19 @@ export function ProjectScene({ project }: { project: Project }) {
             touchY = nextTouchY;
         };
 
-        window.addEventListener("wheel", handleWheel, { passive: false });
+        // Capture stellt sicher, dass das Mausrad auch dann ankommt, wenn der
+        // Zeiger seit dem Öffnen der Detailseite nicht bewegt wurde.
+        window.addEventListener("wheel", handleWheel, { passive: false, capture: true });
         window.addEventListener("touchstart", handleTouchStart, { passive: true });
         window.addEventListener("touchmove", handleTouchMove, { passive: false });
 
         return () => {
-            stopObservingProgress();
-            window.removeEventListener("wheel", handleWheel);
+            window.removeEventListener("scroll", handleScroll);
+            window.removeEventListener("wheel", handleWheel, true);
             window.removeEventListener("touchstart", handleTouchStart);
             window.removeEventListener("touchmove", handleTouchMove);
         };
-    }, [finalSlideProgress, router, scrollYProgress]);
+    }, [router]);
 
     if (prefersReducedMotion) {
         return (
