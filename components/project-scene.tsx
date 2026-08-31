@@ -44,23 +44,15 @@ export function ProjectScene({ project }: { project: Project }) {
         return `-${slideProgress * slideTransitions * 100}%`;
     });
 
-    // An der Wand wird die laufende Geste abgefangen. Erst nach einer kurzen
-    // Pause (Maus/Trackpad) bzw. einer neuen Wischgeste (Touch) geht es zurück.
+    // Der nächste Abwärtsimpuls nach Erreichen der Wand führt zur Übersicht.
     useEffect(() => {
         let hasNavigated = false;
         let touchY: number | undefined;
-        let touchStartedAtWall = false;
-        let lastWheelAtWall = 0;
 
         const stopObservingProgress = scrollYProgress.on("change", (progress) => {
             // 99,9 % entspricht nur wenigen Pixeln und vermeidet Rundungsfehler
             // am Ende eines scrollbaren Containers.
             const isAtWall = progress >= 0.999;
-            if (isAtWall && !endWallActiveRef.current) {
-                // Der Scrollimpuls, der die Wand erreicht, zählt noch nicht
-                // als bewusste Geste zum Verlassen der Projektdetailseite.
-                lastWheelAtWall = performance.now();
-            }
             endWallActiveRef.current = isAtWall;
         });
 
@@ -78,40 +70,35 @@ export function ProjectScene({ project }: { project: Project }) {
             window.setTimeout(() => {
                 window.removeEventListener("wheel", blockMomentum);
                 window.removeEventListener("touchmove", blockMomentum);
-            }, 450);
+            }, 700);
 
             router.replace("/#projects-title");
         };
 
-        const pushAgainstWall = (distance: number, event: Event, canLeaveWall: boolean) => {
-            if (!endWallActiveRef.current || distance <= 0) return;
+        const pushAgainstWall = (distance: number, event: Event) => {
+            const trackBottom = trackContainerRef.current?.getBoundingClientRect().bottom;
+            const isAtWall =
+                endWallActiveRef.current ||
+                (trackBottom !== undefined && trackBottom <= window.innerHeight + 1);
+            if (!isAtWall || distance <= 0) return;
 
             event.preventDefault();
-            if (canLeaveWall) returnToOverview();
+            returnToOverview();
         };
 
         const handleWheel = (event: WheelEvent) => {
-            const now = performance.now();
-            // Ein kurzer Abstand trennt die Geste, die die Wand erreicht, von
-            // der bewussten nächsten Geste zum Verlassen der Detailansicht.
-            const canLeaveWall = now - lastWheelAtWall > 120;
-
-            pushAgainstWall(event.deltaY, event, canLeaveWall);
-            if (endWallActiveRef.current && event.deltaY > 0) {
-                lastWheelAtWall = now;
-            }
+            pushAgainstWall(event.deltaY, event);
         };
 
         const handleTouchStart = (event: TouchEvent) => {
             touchY = event.touches[0]?.clientY;
-            touchStartedAtWall = endWallActiveRef.current;
         };
 
         const handleTouchMove = (event: TouchEvent) => {
             const nextTouchY = event.touches[0]?.clientY;
             if (touchY === undefined || nextTouchY === undefined) return;
 
-            pushAgainstWall(touchY - nextTouchY, event, touchStartedAtWall);
+            pushAgainstWall(touchY - nextTouchY, event);
             touchY = nextTouchY;
         };
 
