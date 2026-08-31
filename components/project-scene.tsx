@@ -53,7 +53,9 @@ export function ProjectScene({ project }: { project: Project }) {
         let lastWheelAtWall = 0;
 
         const stopObservingProgress = scrollYProgress.on("change", (progress) => {
-            const isAtWall = progress >= 0.9999;
+            // 99,9 % entspricht nur wenigen Pixeln und vermeidet Rundungsfehler
+            // am Ende eines scrollbaren Containers.
+            const isAtWall = progress >= 0.999;
             if (isAtWall && !endWallActiveRef.current) {
                 // Der Scrollimpuls, der die Wand erreicht, zählt noch nicht
                 // als bewusste Geste zum Verlassen der Projektdetailseite.
@@ -66,7 +68,19 @@ export function ProjectScene({ project }: { project: Project }) {
             if (hasNavigated) return;
 
             hasNavigated = true;
-            router.replace("/#projects-title", { scroll: false });
+
+            // Das Momentum einer Maus-/Trackpad-Geste lebt über den
+            // Routenwechsel hinaus. Es wird deshalb kurz global abgefangen,
+            // damit die Übersicht am Projekttitel stehen bleibt.
+            const blockMomentum = (event: Event) => event.preventDefault();
+            window.addEventListener("wheel", blockMomentum, { passive: false });
+            window.addEventListener("touchmove", blockMomentum, { passive: false });
+            window.setTimeout(() => {
+                window.removeEventListener("wheel", blockMomentum);
+                window.removeEventListener("touchmove", blockMomentum);
+            }, 450);
+
+            router.replace("/#projects-title");
         };
 
         const pushAgainstWall = (distance: number, event: Event, canLeaveWall: boolean) => {
@@ -78,7 +92,9 @@ export function ProjectScene({ project }: { project: Project }) {
 
         const handleWheel = (event: WheelEvent) => {
             const now = performance.now();
-            const canLeaveWall = now - lastWheelAtWall > 250;
+            // Ein kurzer Abstand trennt die Geste, die die Wand erreicht, von
+            // der bewussten nächsten Geste zum Verlassen der Detailansicht.
+            const canLeaveWall = now - lastWheelAtWall > 120;
 
             pushAgainstWall(event.deltaY, event, canLeaveWall);
             if (endWallActiveRef.current && event.deltaY > 0) {
