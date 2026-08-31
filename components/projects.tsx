@@ -27,9 +27,11 @@ export function Projects() {
               >
                 <div
                   className={
-                    project.portrait
-                      ? "mx-auto w-[320px]"
-                      : `mx-auto ${project.overviewImageWidth ?? "w-full"}`
+                    project.overviewImageWidth
+                      ? `mx-auto ${project.overviewImageWidth}`
+                      : project.portrait
+                        ? "mx-auto w-[320px]"
+                        : "mx-auto w-full"
                   }
                 >
                   <Image

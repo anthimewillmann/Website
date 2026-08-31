@@ -17,6 +17,7 @@ export const projects: Project[] = [
       "AI-powered iOS recipe manager built with SwiftUI, Foundation Models, and Vision OCR for recipe generation, scanning, and guided cooking.",
     href: "https://apps.apple.com/us/app/culinaro/id6764299394",
     image: "/Culinaro.PNG",
+    overviewImageWidth: "w-[59.8%]",
     // TODO: weitere Screenshots ergänzen, aktuell nur 1 Bild vorhanden
     gallery: ["/Culinaro.PNG"],
     portrait: true,
@@ -28,6 +29,7 @@ export const projects: Project[] = [
         "Safari Web Extension for AI-powered webpage summaries and follow-up questions using Apple Foundation Models.",
     href: "https://github.com/anthimewillmann/Sumari",
     image: "/Sumari.PNG",
+    overviewImageWidth: "w-[59.8%]",
     gallery: [
       "/565B4AED-40A0-4D86-BC48-17FA3EBBDBDD_1_101_o.jpeg",
       "/1B4C09C4-152A-4C51-A5E3-1AB3BCB0E890_1_101_o.jpeg",
