@@ -3,6 +3,7 @@ export type Project = {
   name: string;
   description: string;
   href: string;
+  linkLabel: string;
   image: string;
   gallery: string[];
   portrait?: boolean;
@@ -16,6 +17,7 @@ export const projects: Project[] = [
     description:
       "AI-powered iOS recipe manager built with SwiftUI, Foundation Models, and Vision OCR for recipe generation, scanning, and guided cooking.",
     href: "https://apps.apple.com/us/app/culinaro/id6764299394",
+    linkLabel: "App Store",
     image: "/Culinaro.PNG",
     overviewImageWidth: "w-[59.8%]",
     // TODO: weitere Screenshots ergänzen, aktuell nur 1 Bild vorhanden
@@ -28,6 +30,7 @@ export const projects: Project[] = [
     description:
         "Safari Web Extension for AI-powered webpage summaries and follow-up questions using Apple Foundation Models.",
     href: "https://github.com/anthimewillmann/Sumari",
+    linkLabel: "GitHub",
     image: "/Sumari.PNG",
     overviewImageWidth: "w-[59.8%]",
     gallery: [
@@ -42,6 +45,7 @@ export const projects: Project[] = [
     description:
         "Data Science Project: The Personal Traffic around Kiel in the past five years",
     href: "https://kiel-traffic-analysis-7q4iyxxr2obfcxkxzmuq2k.streamlit.app/",
+    linkLabel: "Website",
     image: "/Kiel-Traffic-Analysis.png",
     gallery: [
       "/C53FA7C2-E98F-4C43-AB77-57001220F97E_1_102_o.jpeg",
@@ -66,6 +70,7 @@ export const projects: Project[] = [
     description:
         "Java Swing maze game with difficulty modes, keyboard controls, and Dijkstra-based pursuers.",
     href: "https://github.com/anthimewillmann/Labyrinth",
+    linkLabel: "GitHub",
     image: "/Labyrinth.jpeg",
     // Das Bild ist nahezu quadratisch. Mit 59,8 % der Spaltenbreite erhält
     // es dieselbe sichtbare Höhe wie das breitere Kiel-Traffic-Bild.

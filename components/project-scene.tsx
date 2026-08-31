@@ -39,7 +39,7 @@ function ProjectStack({
                         rel="noopener noreferrer"
                         className="mt-8 inline-flex min-h-12 items-center justify-center rounded-full bg-[var(--accent)] px-8 text-center font-sans text-sm font-medium tracking-[-0.01em] text-white transition-transform duration-200 hover:scale-[1.05] sm:min-h-14 sm:text-base dark:text-[#0a0a0a]"
                     >
-                        Projekt öffnen
+                        {project.linkLabel}
                     </a>
                 </div>
 
@@ -302,7 +302,7 @@ export function ProjectScene({ project }: { project: Project }) {
                                     rel="noopener noreferrer"
                                     className="inline-flex min-h-12 items-center justify-center rounded-full bg-[var(--accent)] px-8 text-center font-sans text-sm font-medium tracking-[-0.01em] text-white transition-transform duration-200 hover:scale-[1.05] sm:min-h-14 sm:text-base dark:text-[#0a0a0a]"
                                 >
-                                    Projekt öffnen
+                                    {project.linkLabel}
                                 </a>
                             </div>
                         </div>
