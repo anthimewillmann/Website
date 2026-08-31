@@ -9,14 +9,12 @@ export function Projects() {
       className="bg-[var(--background)] px-6 pb-12 pt-16 sm:px-10 sm:pb-16 sm:pt-20 md:px-14 lg:pt-72"
     >
       <div className="mx-auto w-full max-w-[1360px]">
-        <div className="grid grid-cols-1 gap-x-8 lg:grid-cols-2 lg:gap-x-10">
-          <h2
-            id="projects-title"
-            className="text-center font-sans text-[clamp(2.75rem,7vw,5.5rem)] font-medium leading-[0.95] tracking-[-0.045em] text-[var(--foreground)]"
-          >
-            Projects
-          </h2>
-        </div>
+        <h2
+          id="projects-title"
+          className="text-center font-sans text-[clamp(2.75rem,7vw,5.5rem)] font-medium leading-[0.95] tracking-[-0.045em] text-[var(--foreground)]"
+        >
+          Projects
+        </h2>
 
         <div className="mt-14 grid grid-cols-1 gap-x-8 gap-y-20 sm:mt-20 lg:grid-cols-2 lg:gap-x-10">
           {projects.map((project) => (
