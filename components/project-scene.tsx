@@ -224,15 +224,15 @@ export function ProjectScene({ project }: { project: Project }) {
                     <motion.div
                         ref={horizontalTrackRef}
                         style={{ x }}
-                        className="flex h-full w-max items-center gap-8 px-8 sm:gap-10 sm:px-10 md:gap-14 md:px-14"
+                        className="flex h-full w-max items-center gap-10 px-10 sm:gap-14 sm:px-14 md:gap-16 md:px-16"
                     >
-                        <div className="flex h-full w-[min(560px,calc(100vw-4rem))] flex-none items-center justify-center sm:w-[min(560px,calc(100vw-5rem))] md:w-[min(560px,calc(100vw-7rem))]">
-                            <div className="flex w-full flex-col items-center text-center">
+                        <div className="flex h-full w-[min(560px,calc(100vw-5rem))] flex-none items-center justify-center sm:w-[min(560px,calc(100vw-7rem))] md:w-[min(560px,calc(100vw-8rem))]">
+                            <div className="flex w-full flex-col items-center gap-10 text-center sm:gap-14 md:gap-16">
                                 <h1 className="text-balance font-sans text-[clamp(2.25rem,6vw,4rem)] font-medium leading-[0.95] tracking-[-0.045em] text-[var(--foreground)]">
                                     {project.name}
                                 </h1>
 
-                                <p className="mt-6 max-w-[440px] font-sans text-base font-medium leading-relaxed tracking-[-0.01em] text-[var(--foreground)] opacity-80">
+                                <p className="max-w-[440px] font-sans text-base font-medium leading-relaxed tracking-[-0.01em] text-[var(--foreground)] opacity-80">
                                     {project.description}
                                 </p>
 
@@ -240,7 +240,7 @@ export function ProjectScene({ project }: { project: Project }) {
                                     href={project.href}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="mt-8 inline-flex min-h-12 items-center justify-center rounded-full bg-[var(--accent)] px-8 text-center font-sans text-sm font-medium tracking-[-0.01em] text-white transition-transform duration-200 hover:scale-[1.05] sm:min-h-14 sm:text-base dark:text-[#0a0a0a]"
+                                    className="inline-flex min-h-12 items-center justify-center rounded-full bg-[var(--accent)] px-8 text-center font-sans text-sm font-medium tracking-[-0.01em] text-white transition-transform duration-200 hover:scale-[1.05] sm:min-h-14 sm:text-base dark:text-[#0a0a0a]"
                                 >
                                     Projekt öffnen
                                 </a>
@@ -250,7 +250,7 @@ export function ProjectScene({ project }: { project: Project }) {
                         {project.gallery.map((src, index) => (
                             <div
                                 key={src + index}
-                                className="flex h-full flex-none items-center justify-center py-8 sm:py-10 md:py-14"
+                                className="flex h-full flex-none items-center justify-center py-10 sm:py-14 md:py-16"
                             >
                                 {failedImages.has(index) ? (
                                     <div className="flex h-full max-h-full w-[min(70vw,560px)] items-center justify-center rounded-[24px] bg-[var(--card)] text-sm font-medium text-[var(--foreground)] opacity-60">
@@ -262,7 +262,7 @@ export function ProjectScene({ project }: { project: Project }) {
                                         alt={`${project.name} Screenshot ${index + 1}`}
                                         loading={index === 0 ? "eager" : "lazy"}
                                         onError={() => markImageFailed(index)}
-                                        className="block h-auto max-h-full w-auto max-w-[calc(100vw-4rem)] rounded-[24px] object-contain shadow-xl ring-1 ring-black/[0.05] sm:max-w-[calc(100vw-5rem)] md:max-w-[calc(100vw-7rem)] dark:ring-white/[0.08]"
+                                        className="block h-auto max-h-full w-auto max-w-[calc(100vw-5rem)] rounded-[24px] object-contain shadow-xl ring-1 ring-black/[0.05] sm:max-w-[calc(100vw-7rem)] md:max-w-[calc(100vw-8rem)] dark:ring-white/[0.08]"
                                     />
                                 )}
                             </div>
