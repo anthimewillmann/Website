@@ -3,13 +3,87 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useReducedMotion } from "framer-motion";
 import type { Project } from "@/lib/projects";
+
+function ProjectStack({
+    project,
+    failedImages,
+    onImageError,
+    className,
+}: {
+    project: Project;
+    failedImages: Set<number>;
+    onImageError: (index: number) => void;
+    className?: string;
+}) {
+    return (
+        <main className={`bg-[var(--background)] ${className ?? ""}`}>
+            <section className="mx-auto flex w-full max-w-[1200px] flex-col items-center gap-10 px-6 py-10 sm:px-10 sm:py-14">
+                <div className="flex w-full max-w-[560px] flex-col items-center text-center">
+                    <h1 className="text-balance font-sans text-[clamp(2.25rem,6vw,4rem)] font-medium leading-[0.95] tracking-[-0.045em] text-[var(--foreground)]">
+                        {project.name}
+                    </h1>
+                    <p className="mt-6 max-w-[440px] font-sans text-base font-medium leading-relaxed tracking-[-0.01em] text-[var(--foreground)] opacity-80">
+                        {project.description}
+                    </p>
+                    <a
+                        href={project.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-8 inline-flex min-h-12 items-center justify-center rounded-full bg-[var(--accent)] px-8 text-center font-sans text-sm font-medium tracking-[-0.01em] text-white transition-transform duration-200 hover:scale-[1.05] sm:min-h-14 sm:text-base dark:text-[#0a0a0a]"
+                    >
+                        Projekt öffnen
+                    </a>
+                </div>
+
+                <div className="flex w-full flex-col items-center gap-10">
+                    {project.gallery.map((src, index) =>
+                        failedImages.has(index) ? (
+                            <div
+                                key={src + index}
+                                className={`flex aspect-[4/3] w-full items-center justify-center rounded-[24px] bg-[var(--card)] text-sm font-medium text-[var(--foreground)] opacity-60 ${
+                                    project.portrait ? "max-w-[280px]" : "max-w-[520px]"
+                                }`}
+                            >
+                                Bild nicht verfügbar
+                            </div>
+                        ) : (
+                            <div
+                                key={src + index}
+                                className={project.portrait ? "w-full max-w-[280px]" : "w-full max-w-[520px]"}
+                            >
+                                <Image
+                                    src={src}
+                                    alt={`${project.name} Screenshot ${index + 1}`}
+                                    width={project.portrait ? 600 : 1600}
+                                    height={project.portrait ? 1300 : 1000}
+                                    className="h-auto w-full rounded-[24px] shadow-xl ring-1 ring-black/[0.05] dark:ring-white/[0.08]"
+                                    priority={index === 0}
+                                    onError={() => onImageError(index)}
+                                />
+                            </div>
+                        )
+                    )}
+                </div>
+
+                <a
+                    href="/#projects-title"
+                    className="font-sans text-sm font-medium tracking-[-0.01em] text-[var(--foreground)] opacity-70 underline-offset-4 hover:underline"
+                >
+                    Zurück zur Übersicht
+                </a>
+            </section>
+        </main>
+    );
+}
 
 export function ProjectScene({ project }: { project: Project }) {
     const router = useRouter();
     const trackContainerRef = useRef<HTMLDivElement>(null);
     const horizontalTrackRef = useRef<HTMLDivElement>(null);
     const endWallActiveRef = useRef(false);
+    const prefersReducedMotion = useReducedMotion();
     const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
     const [horizontalTravel, setHorizontalTravel] = useState(0);
     const [horizontalOffset, setHorizontalOffset] = useState(0);
@@ -102,7 +176,12 @@ export function ProjectScene({ project }: { project: Project }) {
         };
 
         const updateEndWallState = () => {
-            const trackBottom = trackContainerRef.current?.getBoundingClientRect().bottom;
+            const track = trackContainerRef.current;
+            if (!track || track.offsetParent === null) {
+                setEndWallState(false);
+                return;
+            }
+            const trackBottom = track.getBoundingClientRect().bottom;
             setEndWallState(trackBottom !== undefined && trackBottom <= window.innerHeight + 1);
         };
         updateEndWallState();
@@ -123,10 +202,9 @@ export function ProjectScene({ project }: { project: Project }) {
             const isNewGesture = now - lastDownwardInputAt > 150;
             lastDownwardInputAt = now;
 
-            const trackBottom = trackContainerRef.current?.getBoundingClientRect().bottom;
-            const isAtWall = trackBottom !== undefined
-                ? trackBottom <= window.innerHeight + 1
-                : endWallActiveRef.current;
+            const track = trackContainerRef.current;
+            if (!track || track.offsetParent === null) return;
+            const isAtWall = track.getBoundingClientRect().bottom <= window.innerHeight + 1;
             setEndWallState(isAtWall);
             if (!isAtWall) return;
 
@@ -167,8 +245,25 @@ export function ProjectScene({ project }: { project: Project }) {
         };
     }, [router]);
 
+    if (prefersReducedMotion) {
+        return (
+            <ProjectStack
+                project={project}
+                failedImages={failedImages}
+                onImageError={markImageFailed}
+            />
+        );
+    }
+
     return (
-        <main className="bg-[var(--background)]">
+        <>
+            <ProjectStack
+                className="md:hidden"
+                project={project}
+                failedImages={failedImages}
+                onImageError={markImageFailed}
+            />
+            <main className="hidden bg-[var(--background)] md:block">
             <div
                 ref={trackContainerRef}
                 style={{ height: `calc(100svh + ${horizontalTravel}px)` }}
@@ -224,6 +319,7 @@ export function ProjectScene({ project }: { project: Project }) {
                     </div>
                 </div>
             </div>
-        </main>
+            </main>
+        </>
     );
 }
