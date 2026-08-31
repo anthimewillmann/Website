@@ -9,9 +9,11 @@ import type { Project } from "@/lib/projects";
 export function ProjectScene({ project }: { project: Project }) {
     const router = useRouter();
     const trackContainerRef = useRef<HTMLDivElement>(null);
+    const horizontalTrackRef = useRef<HTMLDivElement>(null);
     const endWallActiveRef = useRef(false);
     const prefersReducedMotion = useReducedMotion();
     const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
+    const [horizontalTravel, setHorizontalTravel] = useState(0);
 
     const markImageFailed = (index: number) =>
         setFailedImages((previous) => {
@@ -21,11 +23,25 @@ export function ProjectScene({ project }: { project: Project }) {
             return next;
         });
 
-    const slideCount = 1 + project.gallery.length;
-    const slideTransitions = Math.max(slideCount - 1, 0);
-    const scrollDistanceScreens = slideTransitions;
-    const finalSlideProgress =
-        slideTransitions === 0 ? 1 : slideTransitions / scrollDistanceScreens;
+    useEffect(() => {
+        const track = horizontalTrackRef.current;
+        if (!track) return;
+
+        const updateTravel = () => {
+            setHorizontalTravel(Math.max(track.scrollWidth - window.innerWidth, 0));
+        };
+
+        const resizeObserver = new ResizeObserver(updateTravel);
+        resizeObserver.observe(track);
+        window.addEventListener("resize", updateTravel);
+        const animationFrame = requestAnimationFrame(updateTravel);
+
+        return () => {
+            cancelAnimationFrame(animationFrame);
+            resizeObserver.disconnect();
+            window.removeEventListener("resize", updateTravel);
+        };
+    }, [project.slug]);
 
     const { scrollYProgress } = useScroll({
         target: trackContainerRef,
@@ -33,10 +49,7 @@ export function ProjectScene({ project }: { project: Project }) {
     });
 
     const x = useTransform(scrollYProgress, (progress) => {
-        if (slideTransitions === 0) return "0%";
-
-        const slideProgress = Math.min(progress / finalSlideProgress, 1);
-        return `-${slideProgress * slideTransitions * 100}%`;
+        return `-${progress * horizontalTravel}px`;
     });
 
     useEffect(() => {
@@ -124,7 +137,7 @@ export function ProjectScene({ project }: { project: Project }) {
             window.removeEventListener("touchstart", handleTouchStart);
             window.removeEventListener("touchmove", handleTouchMove);
         };
-    }, [finalSlideProgress, router, scrollYProgress]);
+    }, [router, scrollYProgress]);
 
     if (prefersReducedMotion) {
         return (
@@ -204,13 +217,17 @@ export function ProjectScene({ project }: { project: Project }) {
         <main className="bg-[var(--background)]">
             <div
                 ref={trackContainerRef}
-                style={{ height: `${(scrollDistanceScreens + 1) * 100}vh` }}
+                style={{ height: `calc(100svh + ${horizontalTravel}px)` }}
                 className="relative"
             >
                 <div className="sticky top-0 h-[100svh] w-full overflow-hidden">
-                    <motion.div style={{ x }} className="flex h-full">
-                        <div className="flex h-full w-full flex-none items-center justify-center p-6 sm:p-8 md:p-10">
-                            <div className="mx-auto flex w-full max-w-[560px] flex-col items-center text-center">
+                    <motion.div
+                        ref={horizontalTrackRef}
+                        style={{ x }}
+                        className="flex h-full w-max items-center gap-8 px-8 sm:gap-10 sm:px-10 md:gap-14 md:px-14"
+                    >
+                        <div className="flex h-full w-[min(560px,calc(100vw-4rem))] flex-none items-center justify-center sm:w-[min(560px,calc(100vw-5rem))] md:w-[min(560px,calc(100vw-7rem))]">
+                            <div className="flex w-full flex-col items-center text-center">
                                 <h1 className="text-balance font-sans text-[clamp(2.25rem,6vw,4rem)] font-medium leading-[0.95] tracking-[-0.045em] text-[var(--foreground)]">
                                     {project.name}
                                 </h1>
@@ -233,10 +250,10 @@ export function ProjectScene({ project }: { project: Project }) {
                         {project.gallery.map((src, index) => (
                             <div
                                 key={src + index}
-                                className="flex h-full w-full flex-none items-center justify-center p-6 sm:p-8 md:p-10"
+                                className="flex h-full flex-none items-center justify-center py-8 sm:py-10 md:py-14"
                             >
                                 {failedImages.has(index) ? (
-                                    <div className="flex h-full max-h-[70vh] w-full max-w-[70vw] items-center justify-center rounded-[24px] bg-[var(--card)] text-sm font-medium text-[var(--foreground)] opacity-60">
+                                    <div className="flex h-full max-h-full w-[min(70vw,560px)] items-center justify-center rounded-[24px] bg-[var(--card)] text-sm font-medium text-[var(--foreground)] opacity-60">
                                         Bild nicht verfügbar
                                     </div>
                                 ) : (
@@ -245,7 +262,7 @@ export function ProjectScene({ project }: { project: Project }) {
                                         alt={`${project.name} Screenshot ${index + 1}`}
                                         loading={index === 0 ? "eager" : "lazy"}
                                         onError={() => markImageFailed(index)}
-                                        className="h-auto max-h-full w-auto max-w-full rounded-[24px] object-contain shadow-xl ring-1 ring-black/[0.05] dark:ring-white/[0.08]"
+                                        className="block h-auto max-h-full w-auto max-w-[calc(100vw-4rem)] rounded-[24px] object-contain shadow-xl ring-1 ring-black/[0.05] sm:max-w-[calc(100vw-5rem)] md:max-w-[calc(100vw-7rem)] dark:ring-white/[0.08]"
                                     />
                                 )}
                             </div>
