@@ -21,6 +21,7 @@ export function Projects() {
             <article key={project.name} className="text-center">
               <Link
                 href={`/projects/${project.slug}`}
+                scroll={true}
                 className="group block rounded-[32px] outline-offset-8 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--accent)]"
                 aria-label={`${project.name} und Bildergalerie öffnen`}
               >

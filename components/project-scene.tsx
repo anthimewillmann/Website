@@ -18,7 +18,17 @@ export function ProjectScene({ project }: { project: Project }) {
     // Next.js behält beim Wechsel aus der Übersicht gelegentlich die bisherige
     // vertikale Position bei. Jede Projektseite beginnt daher oben beim Titel.
     useLayoutEffect(() => {
-        window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        const scrollToStart = () => window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        scrollToStart();
+        const firstFrame = requestAnimationFrame(scrollToStart);
+        const secondFrame = requestAnimationFrame(() => {
+            requestAnimationFrame(scrollToStart);
+        });
+
+        return () => {
+            cancelAnimationFrame(firstFrame);
+            cancelAnimationFrame(secondFrame);
+        };
     }, [project.slug]);
 
     const markImageFailed = (index: number) =>
