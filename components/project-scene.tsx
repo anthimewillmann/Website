@@ -44,21 +44,37 @@ export function ProjectScene({ project }: { project: Project }) {
         return `-${slideProgress * slideTransitions * 100}%`;
     });
 
-    // Der nächste Abwärtsimpuls nach Erreichen der Wand führt zur Übersicht.
+    // An der Wand wird die laufende Scroll-Geste absorbiert. Erst eine neue
+    // Geste nach kurzem Loslassen führt zur Übersicht.
     useEffect(() => {
         let hasNavigated = false;
         let touchY: number | undefined;
+        let wallReadyToLeave = false;
+        let armWallTimer: number | undefined;
+        let lastDownwardInputAt = 0;
 
-        const updateEndWallState = () => {
-            const trackBottom = trackContainerRef.current?.getBoundingClientRect().bottom;
-            // Ein Pixel Toleranz vermeidet Rundungsfehler am Ende des Containers.
-            endWallActiveRef.current =
-                trackBottom !== undefined && trackBottom <= window.innerHeight + 1;
+        const armWallExit = () => {
+            wallReadyToLeave = false;
+            if (armWallTimer !== undefined) window.clearTimeout(armWallTimer);
+            armWallTimer = window.setTimeout(() => {
+                wallReadyToLeave = true;
+            }, 150);
         };
 
-        const handleScroll = () => updateEndWallState();
-        updateEndWallState();
-        window.addEventListener("scroll", handleScroll, { passive: true });
+        const setEndWallState = (isAtWall: boolean) => {
+            if (isAtWall && !endWallActiveRef.current) armWallExit();
+            if (!isAtWall) {
+                wallReadyToLeave = false;
+                if (armWallTimer !== undefined) window.clearTimeout(armWallTimer);
+            }
+            endWallActiveRef.current = isAtWall;
+        };
+
+        const stopObservingProgress = scrollYProgress.on("change", (progress) => {
+            // 99,9 % entspricht nur wenigen Pixeln und vermeidet Rundungsfehler
+            // am Ende eines scrollbaren Containers.
+            setEndWallState(progress >= 0.999);
+        });
 
         const returnToOverview = () => {
             if (hasNavigated) return;
@@ -80,11 +96,25 @@ export function ProjectScene({ project }: { project: Project }) {
         };
 
         const pushAgainstWall = (distance: number, event: Event) => {
-            updateEndWallState();
-            if (!endWallActiveRef.current || distance <= 0) return;
+            if (distance <= 0) return;
+
+            const now = performance.now();
+            const isNewGesture = now - lastDownwardInputAt > 150;
+            lastDownwardInputAt = now;
+
+            const trackBottom = trackContainerRef.current?.getBoundingClientRect().bottom;
+            const isAtWall = trackBottom !== undefined
+                ? trackBottom <= window.innerHeight + 1
+                : endWallActiveRef.current;
+            setEndWallState(isAtWall);
+            if (!isAtWall) return;
 
             event.preventDefault();
-            returnToOverview();
+            if (wallReadyToLeave || isNewGesture) {
+                returnToOverview();
+            } else {
+                armWallExit();
+            }
         };
 
         const handleWheel = (event: WheelEvent) => {
@@ -103,19 +133,18 @@ export function ProjectScene({ project }: { project: Project }) {
             touchY = nextTouchY;
         };
 
-        // Capture stellt sicher, dass das Mausrad auch dann ankommt, wenn der
-        // Zeiger seit dem Öffnen der Detailseite nicht bewegt wurde.
         window.addEventListener("wheel", handleWheel, { passive: false, capture: true });
         window.addEventListener("touchstart", handleTouchStart, { passive: true });
         window.addEventListener("touchmove", handleTouchMove, { passive: false });
 
         return () => {
-            window.removeEventListener("scroll", handleScroll);
+            if (armWallTimer !== undefined) window.clearTimeout(armWallTimer);
+            stopObservingProgress();
             window.removeEventListener("wheel", handleWheel, true);
             window.removeEventListener("touchstart", handleTouchStart);
             window.removeEventListener("touchmove", handleTouchMove);
         };
-    }, [router]);
+    }, [finalSlideProgress, router, scrollYProgress]);
 
     if (prefersReducedMotion) {
         return (
