@@ -7,10 +7,6 @@ import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion
 import type { Project } from "@/lib/projects";
 
 export function ProjectScene({ project }: { project: Project }) {
-    // Kurz vor dem Ende erreicht das letzte Bild seine Position. Danach hält
-    // eine echte Scroll-Sperre die Ansicht fest, statt die Strecke nur zu
-    // verlängern.
-    const wallApproachScreens = 0.1;
     const router = useRouter();
     const trackContainerRef = useRef<HTMLDivElement>(null);
     const endWallActiveRef = useRef(false);
@@ -31,7 +27,7 @@ export function ProjectScene({ project }: { project: Project }) {
     // nicht gibt, und man scrollt am Ende ins Leere.
     const slideCount = 1 + project.gallery.length;
     const slideTransitions = Math.max(slideCount - 1, 0);
-    const scrollDistanceScreens = slideTransitions + wallApproachScreens;
+    const scrollDistanceScreens = slideTransitions;
     const finalSlideProgress =
         slideTransitions === 0 ? 1 : slideTransitions / scrollDistanceScreens;
 
@@ -49,15 +45,13 @@ export function ProjectScene({ project }: { project: Project }) {
         return `-${slideProgress * slideTransitions * 100}%`;
     });
 
-    // Am Ende wird nach unten gerichtetes Scrollen zunächst abgefangen. Erst
-    // mehrere bewusste Impulse lösen die Rückkehr zur Übersicht aus.
+    // Erst ganz am Ende wird der nächste nach unten gerichtete Scrollimpuls
+    // abgefangen und löst die Rückkehr zur Übersicht aus.
     useEffect(() => {
         const stopObservingProgress = scrollYProgress.on("change", (progress) => {
-            endWallActiveRef.current = progress >= finalSlideProgress;
+            endWallActiveRef.current = progress >= 0.999;
         });
 
-        let pressure = 0;
-        let lastImpulseAt = 0;
         let hasNavigated = false;
         let touchY: number | undefined;
 
@@ -67,16 +61,8 @@ export function ProjectScene({ project }: { project: Project }) {
             event.preventDefault();
             if (hasNavigated) return;
 
-            const now = performance.now();
-            if (now - lastImpulseAt > 350) pressure = 0;
-            lastImpulseAt = now;
-            pressure += distance;
-
-            // Etwa zwei feste Trackpad-Gesten bzw. neun Mausrad-Schritte.
-            if (pressure >= 900) {
-                hasNavigated = true;
-                router.replace("/#projects-title", { scroll: false });
-            }
+            hasNavigated = true;
+            router.replace("/#projects-title", { scroll: false });
         };
 
         const handleWheel = (event: WheelEvent) => {
