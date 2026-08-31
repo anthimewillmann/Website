@@ -39,45 +39,63 @@ export function ProjectScene({ project }: { project: Project }) {
     const x = useTransform(scrollYProgress, (progress) => {
         if (slideTransitions === 0) return "0%";
 
-        // Nach dem letzten Bild bleibt die horizontale Bewegung stehen, während
-        // weiter gescrollt werden muss. Das ist die "Wand" am Ende der Galerie.
+        // Die Wand liegt direkt am letzten Bild der Galerie.
         const slideProgress = Math.min(progress / finalSlideProgress, 1);
         return `-${slideProgress * slideTransitions * 100}%`;
     });
 
-    // Erst ganz am Ende wird der nächste nach unten gerichtete Scrollimpuls
-    // abgefangen und löst die Rückkehr zur Übersicht aus.
+    // An der Wand wird die laufende Geste abgefangen. Erst nach einer kurzen
+    // Pause (Maus/Trackpad) bzw. einer neuen Wischgeste (Touch) geht es zurück.
     useEffect(() => {
-        const stopObservingProgress = scrollYProgress.on("change", (progress) => {
-            endWallActiveRef.current = progress >= 0.999;
-        });
-
         let hasNavigated = false;
         let touchY: number | undefined;
+        let touchStartedAtWall = false;
+        let lastWheelAtWall = 0;
 
-        const pushAgainstWall = (distance: number, event: Event) => {
-            if (!endWallActiveRef.current || distance <= 0) return;
+        const stopObservingProgress = scrollYProgress.on("change", (progress) => {
+            const isAtWall = progress >= 0.9999;
+            if (isAtWall && !endWallActiveRef.current) {
+                // Der Scrollimpuls, der die Wand erreicht, zählt noch nicht
+                // als bewusste Geste zum Verlassen der Projektdetailseite.
+                lastWheelAtWall = performance.now();
+            }
+            endWallActiveRef.current = isAtWall;
+        });
 
-            event.preventDefault();
+        const returnToOverview = () => {
             if (hasNavigated) return;
 
             hasNavigated = true;
             router.replace("/#projects-title", { scroll: false });
         };
 
+        const pushAgainstWall = (distance: number, event: Event, canLeaveWall: boolean) => {
+            if (!endWallActiveRef.current || distance <= 0) return;
+
+            event.preventDefault();
+            if (canLeaveWall) returnToOverview();
+        };
+
         const handleWheel = (event: WheelEvent) => {
-            pushAgainstWall(event.deltaY, event);
+            const now = performance.now();
+            const canLeaveWall = now - lastWheelAtWall > 250;
+
+            pushAgainstWall(event.deltaY, event, canLeaveWall);
+            if (endWallActiveRef.current && event.deltaY > 0) {
+                lastWheelAtWall = now;
+            }
         };
 
         const handleTouchStart = (event: TouchEvent) => {
             touchY = event.touches[0]?.clientY;
+            touchStartedAtWall = endWallActiveRef.current;
         };
 
         const handleTouchMove = (event: TouchEvent) => {
             const nextTouchY = event.touches[0]?.clientY;
             if (touchY === undefined || nextTouchY === undefined) return;
 
-            pushAgainstWall(touchY - nextTouchY, event);
+            pushAgainstWall(touchY - nextTouchY, event, touchStartedAtWall);
             touchY = nextTouchY;
         };
 
