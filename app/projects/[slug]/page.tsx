@@ -20,8 +20,17 @@ export async function generateMetadata({
     const project = getProject(slug);
     if (!project) return {};
     return {
-        title: `${project.name} — Anthime`,
+        title: project.name,
         description: project.description,
+        alternates: {
+            canonical: `/projects/${project.slug}`,
+        },
+        openGraph: {
+            title: `${project.name} | Anthime Willmann`,
+            description: project.description,
+            url: `/projects/${project.slug}`,
+            images: [project.image],
+        },
     };
 }
 
