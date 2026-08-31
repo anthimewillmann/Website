@@ -7,6 +7,10 @@ import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion
 import type { Project } from "@/lib/projects";
 
 export function ProjectScene({ project }: { project: Project }) {
+    // Nach dem letzten Bild bleibt die Galerie noch drei Viewport-Höhen stehen.
+    // So reicht ein einzelner, schneller Scrollimpuls nicht aus, um sofort
+    // wieder zur Übersicht zurückzukehren.
+    const endResistanceScreens = 3;
     const router = useRouter();
     const trackContainerRef = useRef<HTMLDivElement>(null);
     const sentinelRef = useRef<HTMLDivElement>(null);
@@ -26,17 +30,24 @@ export function ProjectScene({ project }: { project: Project }) {
     // wird bei einer leeren Galerie eine Slide "erfunden", die es gar
     // nicht gibt, und man scrollt am Ende ins Leere.
     const slideCount = 1 + project.gallery.length;
+    const slideTransitions = Math.max(slideCount - 1, 0);
+    const scrollDistanceScreens = slideTransitions + endResistanceScreens;
+    const finalSlideProgress =
+        slideTransitions === 0 ? 1 : slideTransitions / scrollDistanceScreens;
 
     const { scrollYProgress } = useScroll({
         target: trackContainerRef,
         offset: ["start start", "end end"],
     });
 
-    const x = useTransform(
-        scrollYProgress,
-        [0, 1],
-        ["0%", `-${Math.max(slideCount - 1, 0) * 100}%`]
-    );
+    const x = useTransform(scrollYProgress, (progress) => {
+        if (slideTransitions === 0) return "0%";
+
+        // Nach dem letzten Bild bleibt die horizontale Bewegung stehen, während
+        // weiter gescrollt werden muss. Das ist die "Wand" am Ende der Galerie.
+        const slideProgress = Math.min(progress / finalSlideProgress, 1);
+        return `-${slideProgress * slideTransitions * 100}%`;
+    });
 
     // Sobald der Sentinel nach der Bilderstrecke sichtbar wird: zurück zur Übersicht
     useEffect(() => {
@@ -65,7 +76,10 @@ export function ProjectScene({ project }: { project: Project }) {
                     // replace statt push: sonst landet man beim
                     // Zurück-Navigieren erst wieder am Ende der
                     // Bilderstrecke, bevor man wirklich zur Übersicht kommt.
-                    router.replace("/#projects-title");
+                    // Next.js soll die Seite nicht zusätzlich selbst scrollen.
+                    // Die Übersicht positioniert sich einmalig und ohne Animation
+                    // auf die Projektüberschrift (siehe ScrollToHash).
+                    router.replace("/#projects-title", { scroll: false });
                 }
             },
             { threshold: 0 }
@@ -152,7 +166,7 @@ export function ProjectScene({ project }: { project: Project }) {
         <main className="bg-[var(--background)]">
             <div
                 ref={trackContainerRef}
-                style={{ height: `${Math.max(slideCount, 1.5) * 100}vh` }}
+                style={{ height: `${(scrollDistanceScreens + 1) * 100}vh` }}
                 className="relative"
             >
                 <div className="sticky top-0 h-[100svh] w-full overflow-hidden">

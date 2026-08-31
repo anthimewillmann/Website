@@ -2,42 +2,23 @@
 
 import { useEffect } from "react";
 
-/**
- * Next.js hat eine eigene, interne Scroll-Behandlung bei Navigationen, die
- * teilweise mit eigenen Scroll-Versuchen in Konflikt gerät (Race Condition) -
- * ein einmaliger Sprung zum Ziel reicht deshalb nicht zuverlässig aus.
- *
- * Statt einmal zu springen, wird die Zielposition für ein kurzes Zeitfenster
- * aktiv "gehalten": auf jedem Frame wird geprüft, ob die Scroll-Position noch
- * stimmt, und bei Abweichung sofort korrigiert. Das gleicht sowohl Next.js'
- * eigenes Scroll-Verhalten als auch Momentum/Trägheitsscrollen aus, egal
- * woher die Abweichung kommt.
- *
- * Zusätzlich wird "html { scroll-behavior: smooth }" (aus globals.css) für
- * die Dauer des Vorgangs deaktiviert, da diese CSS-Eigenschaft auch
- * scrollIntoView/scrollTo mit behavior:"auto" in eine Animation verwandelt -
- * was mit dem "Halten" der Position kollidieren würde.
- */
+/** Positioniert die Rückkehr ohne Animation und fängt Rest-Momentum ab. */
 export function ScrollToHash() {
     useEffect(() => {
         const hash = window.location.hash;
         if (!hash) return;
 
         const id = decodeURIComponent(hash.slice(1));
-
-        const previousScrollBehavior =
-            document.documentElement.style.scrollBehavior;
+        const previousScrollBehavior = document.documentElement.style.scrollBehavior;
         document.documentElement.style.scrollBehavior = "auto";
 
-        const preventScroll = (e: Event) => e.preventDefault();
+        const preventScroll = (event: Event) => event.preventDefault();
         window.addEventListener("wheel", preventScroll, { passive: false });
         window.addEventListener("touchmove", preventScroll, { passive: false });
 
-        let rafId: number;
-        let findAttempts = 0;
-        const maxFindAttempts = 90; // ca. 1.5s bei 60fps
-        const holdDurationMs = 500;
-        let holdStart: number | null = null;
+        let animationFrame: number;
+        let holdStart: number | undefined;
+        const holdDurationMs = 1200;
 
         const cleanup = () => {
             window.removeEventListener("wheel", preventScroll);
@@ -45,37 +26,30 @@ export function ScrollToHash() {
             document.documentElement.style.scrollBehavior = previousScrollBehavior;
         };
 
-        const findAndHold = (timestamp: number) => {
-            const el = document.getElementById(id);
-
-            if (!el) {
-                findAttempts += 1;
-                if (findAttempts < maxFindAttempts) {
-                    rafId = requestAnimationFrame(findAndHold);
-                } else {
-                    cleanup();
-                }
+        const holdAtTarget = (timestamp: number) => {
+            const target = document.getElementById(id);
+            if (!target) {
+                cleanup();
                 return;
             }
 
-            if (holdStart === null) holdStart = timestamp;
-
-            const targetY = el.getBoundingClientRect().top + window.scrollY;
+            if (holdStart === undefined) holdStart = timestamp;
+            const targetY = target.getBoundingClientRect().top + window.scrollY;
             if (Math.abs(window.scrollY - targetY) > 1) {
                 window.scrollTo(0, targetY);
             }
 
             if (timestamp - holdStart < holdDurationMs) {
-                rafId = requestAnimationFrame(findAndHold);
+                animationFrame = requestAnimationFrame(holdAtTarget);
             } else {
                 cleanup();
             }
         };
 
-        rafId = requestAnimationFrame(findAndHold);
+        animationFrame = requestAnimationFrame(holdAtTarget);
 
         return () => {
-            cancelAnimationFrame(rafId);
+            cancelAnimationFrame(animationFrame);
             cleanup();
         };
     }, []);
