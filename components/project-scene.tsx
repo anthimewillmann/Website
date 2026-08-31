@@ -3,18 +3,16 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import type { Project } from "@/lib/projects";
 
 export function ProjectScene({ project }: { project: Project }) {
     const router = useRouter();
     const trackContainerRef = useRef<HTMLDivElement>(null);
     const horizontalTrackRef = useRef<HTMLDivElement>(null);
-    const hasPositionedTrackRef = useRef(false);
     const endWallActiveRef = useRef(false);
-    const prefersReducedMotion = useReducedMotion();
     const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
     const [horizontalTravel, setHorizontalTravel] = useState(0);
+    const [horizontalOffset, setHorizontalOffset] = useState(0);
 
     // Next.js behält beim Wechsel aus der Übersicht gelegentlich die bisherige
     // vertikale Position bei. Jede Projektseite beginnt daher oben beim Titel.
@@ -64,25 +62,20 @@ export function ProjectScene({ project }: { project: Project }) {
         };
     }, [project.slug]);
 
-    const { scrollYProgress } = useScroll({
-        target: trackContainerRef,
-        offset: ["start start", "end end"],
-    });
+    useEffect(() => {
+        const updateHorizontalOffset = () => {
+            const track = trackContainerRef.current;
+            if (!track) return;
 
-    // Beim ersten Render ist die Breite der Bilder noch unbekannt. Sobald die
-    // echte horizontale Strecke gemessen wurde, erzwingen wir genau einmal den
-    // Startpunkt statt den zuvor möglichen Fortschrittswert 1.
-    useLayoutEffect(() => {
-        if (horizontalTravel <= 0 || hasPositionedTrackRef.current) return;
+            const trackStart = track.getBoundingClientRect().top + window.scrollY;
+            const offset = Math.min(Math.max(window.scrollY - trackStart, 0), horizontalTravel);
+            setHorizontalOffset(offset);
+        };
 
-        hasPositionedTrackRef.current = true;
-        window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-        scrollYProgress.set(0);
-    }, [horizontalTravel, scrollYProgress]);
-
-    const x = useTransform(scrollYProgress, (progress) => {
-        return `-${progress * horizontalTravel}px`;
-    });
+        updateHorizontalOffset();
+        window.addEventListener("scroll", updateHorizontalOffset, { passive: true });
+        return () => window.removeEventListener("scroll", updateHorizontalOffset);
+    }, [horizontalTravel]);
 
     useEffect(() => {
         let hasNavigated = false;
@@ -108,9 +101,12 @@ export function ProjectScene({ project }: { project: Project }) {
             endWallActiveRef.current = isAtWall;
         };
 
-        const stopObservingProgress = scrollYProgress.on("change", (progress) => {
-            setEndWallState(progress >= 0.999);
-        });
+        const updateEndWallState = () => {
+            const trackBottom = trackContainerRef.current?.getBoundingClientRect().bottom;
+            setEndWallState(trackBottom !== undefined && trackBottom <= window.innerHeight + 1);
+        };
+        updateEndWallState();
+        window.addEventListener("scroll", updateEndWallState, { passive: true });
 
         const returnToOverview = () => {
             if (hasNavigated) return;
@@ -164,86 +160,12 @@ export function ProjectScene({ project }: { project: Project }) {
 
         return () => {
             if (armWallTimer !== undefined) window.clearTimeout(armWallTimer);
-            stopObservingProgress();
+            window.removeEventListener("scroll", updateEndWallState);
             window.removeEventListener("wheel", handleWheel, true);
             window.removeEventListener("touchstart", handleTouchStart);
             window.removeEventListener("touchmove", handleTouchMove);
         };
-    }, [router, scrollYProgress]);
-
-    if (prefersReducedMotion) {
-        return (
-            <main className="bg-[var(--background)]">
-                <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-10 px-6 pb-16 pt-10 sm:px-10 sm:pt-14 md:flex-row md:gap-16 md:px-14 md:pt-20">
-                    <div className="flex w-full flex-none flex-col justify-start md:w-[380px] lg:w-[440px]">
-                        <h1 className="text-balance font-sans text-[clamp(2.25rem,6vw,4rem)] font-medium leading-[0.95] tracking-[-0.045em] text-[var(--foreground)]">
-                            {project.name}
-                        </h1>
-
-                        <p className="mt-6 max-w-[440px] font-sans text-base font-medium leading-relaxed tracking-[-0.01em] text-[var(--foreground)] opacity-80">
-                            {project.description}
-                        </p>
-
-                        <a
-                            href={project.href}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="mt-8 inline-flex min-h-12 w-fit items-center justify-center rounded-full bg-[var(--accent)] px-8 text-center font-sans text-sm font-medium tracking-[-0.01em] text-white transition-transform duration-200 hover:scale-[1.05] sm:min-h-14 sm:text-base dark:text-[#0a0a0a]"
-                        >
-                            Projekt öffnen
-                        </a>
-                    </div>
-
-                    <div className="flex flex-1 flex-col gap-10 sm:gap-14">
-                        {project.gallery.length === 0 ? (
-                            <p className="font-sans text-sm text-[var(--foreground)] opacity-60">
-                                Für dieses Projekt sind noch keine Screenshots hinterlegt.
-                            </p>
-                        ) : (
-                            project.gallery.map((src, index) =>
-                                failedImages.has(index) ? (
-                                    <div
-                                        key={src + index}
-                                        className={`flex aspect-[4/3] items-center justify-center rounded-[24px] bg-[var(--card)] text-sm font-medium text-[var(--foreground)] opacity-60 ${
-                                            project.portrait ? "w-full max-w-[280px]" : "w-full max-w-[520px]"
-                                        }`}
-                                    >
-                                        Bild nicht verfügbar
-                                    </div>
-                                ) : (
-                                    <div
-                                        key={src + index}
-                                        className={
-                                            project.portrait
-                                                ? "w-full max-w-[280px]"
-                                                : "w-full max-w-[520px]"
-                                        }
-                                    >
-                                        <Image
-                                            src={src}
-                                            alt={`${project.name} Screenshot ${index + 1}`}
-                                            width={project.portrait ? 600 : 1600}
-                                            height={project.portrait ? 1300 : 1000}
-                                            className="h-auto w-full rounded-[24px] shadow-xl ring-1 ring-black/[0.05] dark:ring-white/[0.08]"
-                                            priority={index === 0}
-                                            onError={() => markImageFailed(index)}
-                                        />
-                                    </div>
-                                )
-                            )
-                        )}
-                    </div>
-                </div>
-
-                <a
-                    href="/#projects-title"
-                    className="mx-auto mb-16 block w-fit font-sans text-sm font-medium tracking-[-0.01em] text-[var(--foreground)] opacity-70 underline-offset-4 hover:underline"
-                >
-                    Zurück zur Übersicht
-                </a>
-            </main>
-        );
-    }
+    }, [router]);
 
     return (
         <main className="bg-[var(--background)]">
@@ -253,9 +175,9 @@ export function ProjectScene({ project }: { project: Project }) {
                 className="relative"
             >
                 <div className="sticky top-0 h-[100svh] w-full overflow-hidden">
-                    <motion.div
+                    <div
                         ref={horizontalTrackRef}
-                        style={{ x }}
+                        style={{ transform: `translateX(-${horizontalOffset}px)` }}
                         className="flex h-full w-max items-center gap-10 px-10 sm:gap-14 sm:px-14 md:gap-16 md:px-16"
                     >
                         <div className="flex h-full w-[min(440px,calc(100vw-5rem))] flex-none items-center justify-center sm:w-[min(440px,calc(100vw-7rem))] md:w-[min(440px,calc(100vw-8rem))]">
@@ -299,7 +221,7 @@ export function ProjectScene({ project }: { project: Project }) {
                                 )}
                             </div>
                         ))}
-                    </motion.div>
+                    </div>
                 </div>
             </div>
         </main>
