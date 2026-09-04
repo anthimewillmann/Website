@@ -18,10 +18,9 @@ export const projects: Project[] = [
       "AI-powered iOS recipe manager built with SwiftUI, Foundation Models, and Vision OCR for recipe generation, scanning, and guided cooking.",
     href: "https://apps.apple.com/us/app/culinaro/id6764299394",
     linkLabel: "App Store",
-    image: "/Culinaro.PNG",
+    image: "/culinaro-recipes.png",
     overviewImageWidth: "w-[59.8%]",
-    // TODO: weitere Screenshots ergänzen, aktuell nur 1 Bild vorhanden
-    gallery: ["/Culinaro.PNG"],
+    gallery: ["/culinaro-recipes.png"],
     portrait: true,
   },
   {

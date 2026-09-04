@@ -4,6 +4,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://anthimewillmann.vercel.app"),
+  applicationName: "Anthime Willmann",
   title: {
     default: "Anthime Willmann",
     template: "%s | Anthime Willmann",
@@ -44,6 +45,19 @@ export default function RootLayout({
 }>) {
   return (
       <html lang="en" className={GeistSans.variable}>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              name: "Anthime Willmann",
+              url: "https://anthimewillmann.vercel.app/",
+            }),
+          }}
+        />
+      </head>
       <body>{children}</body>
       </html>
   );
