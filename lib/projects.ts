@@ -20,7 +20,14 @@ export const projects: Project[] = [
     linkLabel: "App Store",
     image: "/culinaro-recipes.png",
     overviewImageWidth: "w-[59.8%]",
-    gallery: ["/culinaro-recipes.png"],
+    gallery: [
+      "/culinaro-recipes.png",
+      "/culinaro-overview.png",
+      "/culinaro-shopping.png",
+      "/culinaro-ingredients.png",
+      "/culinaro-nutrition.png",
+      "/culinaro-lessons.png",
+    ],
     portrait: true,
   },
   {
