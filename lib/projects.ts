@@ -47,10 +47,10 @@ export const projects: Project[] = [
     gallery: [
       "/sumari-mobile-light.jpeg",
       "/sumari-mobile-dark.jpeg",
+      "/sumari-sheet-light.jpeg",
+      "/sumari-sheet-dark.jpeg",
       "/sumari-desktop-light.png",
       "/sumari-desktop-dark.png",
-      "/sumari-sheet-dark.jpeg",
-      "/sumari-sheet-light.jpeg",
     ],
     portrait: true,
   },
