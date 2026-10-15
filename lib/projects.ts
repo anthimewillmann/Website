@@ -46,11 +46,8 @@ export const projects: Project[] = [
     overviewImageWidth: "w-[59.8%]",
     gallery: [
       "/sumari-mobile-light.jpeg",
-      "/sumari-mobile-dark.jpeg",
       "/sumari-sheet-light.jpeg",
-      "/sumari-sheet-dark.jpeg",
       "/sumari-desktop-light.png",
-      "/sumari-desktop-dark.png",
     ],
     portrait: true,
   },
