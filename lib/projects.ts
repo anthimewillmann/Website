@@ -60,6 +60,7 @@ export const projects: Project[] = [
     linkLabel: "Website",
     image: "/Kiel-Traffic-Analysis.png",
     gallery: [
+      "/C53FA7C2-E98F-4C43-AB77-57001220F97E_1_102_o.jpeg",
       "/FC867FBB-7660-44B6-A720-2B6CEF97BBB7_1_102_o.jpeg",
       "/80867CCE-106F-4D42-A62C-521D6AB4A7FC_1_102_o.jpeg",
       "/FB85450D-7F68-4555-A23C-B98CFC7C8E57_1_102_o.jpeg",
@@ -73,7 +74,6 @@ export const projects: Project[] = [
       "/25395077-1C97-47C8-9B14-A72B62F931A1_1_102_o.jpeg",
       "/B2CE9AD7-648F-4D53-B11B-198822BE7607_1_102_o.jpeg",
       "/BC6CE1FC-A25E-4075-A1A1-5012A3BAEB0D_1_102_o.jpeg",
-      "/C53FA7C2-E98F-4C43-AB77-57001220F97E_1_102_o.jpeg",
     ],
   },
   {
