@@ -40,8 +40,8 @@ export const projects: Project[] = [
     name: "Sumari",
     description:
         "Safari Web Extension for AI-powered webpage summaries and follow-up questions using Apple Foundation Models.",
-    href: "https://github.com/anthimewillmann/Sumari",
-    linkLabel: "GitHub",
+    href: "https://apps.apple.com/us/app/sumari/id6774662813",
+    linkLabel: "App Store",
     image: "/sumari-mobile-light.jpeg",
     overviewImageWidth: "w-[59.8%]",
     gallery: [

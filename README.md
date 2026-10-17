@@ -28,7 +28,7 @@ Project descriptions, external links, preview images, and gallery order are main
 | Project | Portfolio route | Description | External destination |
 |---|---|---|---|
 | Culinaro | `/projects/culinaro` | AI-powered iOS recipe manager with recipe generation, OCR scanning, and guided cooking | App Store |
-| Sumari | `/projects/sumari` | Safari extension for AI-powered webpage summaries and follow-up questions using Apple Foundation Models | GitHub |
+| Sumari | `/projects/sumari` | Safari extension for AI-powered webpage summaries and follow-up questions using Apple Foundation Models | App Store |
 | Kiel Traffic Analysis | `/projects/kiel-traffic-analysis` | Data science project exploring personal traffic around Kiel over five years | Streamlit app |
 | Labyrinth | `/projects/labyrinth` | Java Swing maze game with difficulty modes, keyboard controls, and Dijkstra-based pursuers | GitHub |
 
