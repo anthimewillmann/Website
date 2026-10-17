@@ -47,6 +47,7 @@ export const projects: Project[] = [
     gallery: [
       "/sumari-mobile-light.jpeg",
       "/sumari-sheet-light.jpeg",
+      "/sumari-tablet-light.jpeg",
       "/sumari-desktop-light.png",
     ],
     portrait: true,
