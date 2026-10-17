@@ -15,7 +15,7 @@ export const projects: Project[] = [
     slug: "culinaro",
     name: "Culinaro",
     description:
-      "AI-powered iOS recipe manager built with SwiftUI, Foundation Models, and Vision OCR for recipe generation, scanning, and guided cooking.",
+      "SwiftUI cooking app with AI-powered recipes, guided cooking lessons, shopping lists, and nutrition tracking using Apple Foundation Models.",
     href: "https://apps.apple.com/us/app/culinaro/id6764299394",
     linkLabel: "App Store",
     image: "/culinaro-recipes.png",
