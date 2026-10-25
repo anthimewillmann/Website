@@ -42,6 +42,8 @@ export const projects: Project[] = [
       "/culinaro-ipad-step-1.jpeg",
       "/culinaro-ipad-step-3.jpeg",
       "/culinaro-ipad-step-5.jpeg",
+      "/culinaro-add-recipe-flow.png",
+      "/culinaro-recipe-flow.png",
     ],
     portrait: true,
   },
